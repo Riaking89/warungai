@@ -1,6 +1,8 @@
 // WarungAI — Firebase setup.
-// Project: buildhybridai-ria (Spark free). Client config is public
-// (shipped in the web app by design); it is NOT a secret.
+// Project: warungai-ria ("WarungAI Demo", Spark free) — switched 19 Nov
+// ~03:40 WIB: project 1 (buildhybridai-ria) returns 403 "Gemini API free
+// tier is not available for this project" on every AI call. Client config
+// is public (shipped in the web app by design); it is NOT a secret.
 import { initializeApp } from 'firebase/app';
 import { getAuth, signInAnonymously } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
@@ -13,12 +15,12 @@ import {
 } from 'firebase/ai';
 
 export const firebaseConfig = {
-  apiKey: 'AIzaSyAsamvZp3kTl2CnI89-mT0elgpeuUxX2PE',
-  authDomain: 'buildhybridai-ria.firebaseapp.com',
-  projectId: 'buildhybridai-ria',
-  storageBucket: 'buildhybridai-ria.firebasestorage.app',
-  messagingSenderId: '368065882947',
-  appId: '1:368065882947:web:c175982e949c8825371df6',
+  apiKey: 'AIzaSyAlbvBdFAeMB885vyaIeAXMPF_uLz68xL8',
+  authDomain: 'warungai-ria.firebaseapp.com',
+  projectId: 'warungai-ria',
+  storageBucket: 'warungai-ria.firebasestorage.app',
+  messagingSenderId: '124521567072',
+  appId: '1:124521567072:web:ef9dc9d56f0c4bed3fc405',
 };
 
 export const app = initializeApp(firebaseConfig);
