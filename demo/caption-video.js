@@ -2,9 +2,12 @@
 // Run: node demo/caption-video.js
 // Input: demo-video/<something>.webm (Playwright) + steps.srt
 // Output: demo-video/warungai-demo-captioned.mp4 (falls back to the raw file on error)
-const { execFileSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execFileSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const OUT = path.join(__dirname, '..', 'demo-video');
 const files = fs.readdirSync(OUT).filter((f) => f.endsWith('.webm'));

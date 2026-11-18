@@ -3,9 +3,12 @@
 // Records a <3 min video: add product -> reply draft (hybrid, cloud badge here)
 // -> long caption (cloud) -> history. Logs step timestamps for captions.
 // Run: node demo/record-demo.js   (needs playwright + a Chromium with xvfb)
-const { chromium } = require('playwright');
-const fs = require('fs');
-const path = require('path');
+import { chromium } from 'playwright';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const URL = process.env.WARUNGAI_URL || 'https://riaking89.github.io/warungai/';
 const OUT = path.join(__dirname, '..', 'demo-video');
