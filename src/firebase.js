@@ -65,17 +65,19 @@ export async function ensureAnonAuth() {
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
 // Short replies / short descriptions: on-device first (Gemini Nano),
-// cloud fallback is gemini-3.5-flash-lite (explicit — the SDK default
-// gemini-2.5-flash-lite was retired for new users, 404 in CI 19 Nov).
+// cloud fallback is gemini-3.5-flash-lite. NOTE: with a hybrid `mode` set,
+// the SDK IGNORES a top-level `model` (it warns and falls back to its
+// default gemini-2.5-flash-lite, retired for new users) — the cloud model
+// MUST go in `inCloudParams` (verified in @firebase/ai source, 19 Nov).
 export const hybridModel = getGenerativeModel(ai, {
-  model: 'gemini-3.5-flash-lite',
   mode: InferenceMode.PREFER_ON_DEVICE,
+  inCloudParams: { model: 'gemini-3.5-flash-lite' },
 });
 
 // Long marketing copy: cloud first, on-device fallback if offline.
 export const cloudModel = getGenerativeModel(ai, {
-  model: 'gemini-3.5-flash-lite',
   mode: InferenceMode.PREFER_IN_CLOUD,
+  inCloudParams: { model: 'gemini-3.5-flash-lite' },
 });
 
 let deviceModelInitStarted = false;
