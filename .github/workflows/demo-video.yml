@@ -1,0 +1,38 @@
+# WarungAI demo video — records the <3 min demo in CI, where the network
+egress allows POSTs to Google APIs (the dev sandbox blocks those POSTs,
+# so a live AI answer cannot be recorded there). The video shows the real
+# deployed app at https://riaking89.github.io/warungai/ with real AI answers.
+name: demo-video
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'demo/**'
+      - '.github/workflows/demo-video.yml'
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Record demo
+        run: xvfb-run -a node demo/record-demo.js
+      - name: Burn captions
+        run: node demo/caption-video.js
+        continue-on-error: true
+      - name: Video info
+        run: |
+          ls -la demo-video/
+          ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 demo-video/warungai-demo-captioned.mp4 2>/dev/null || ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 demo-video/*.webm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: warungai-demo-video
+          path: demo-video/
+          retention-days: 30
