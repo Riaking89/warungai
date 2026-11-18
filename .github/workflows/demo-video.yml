@@ -1,5 +1,5 @@
 # WarungAI demo video — records the <3 min demo in CI, where the network
-egress allows POSTs to Google APIs (the dev sandbox blocks those POSTs,
+# egress allows POSTs to Google APIs (the dev sandbox blocks those POSTs,
 # so a live AI answer cannot be recorded there). The video shows the real
 # deployed app at https://riaking89.github.io/warungai/ with real AI answers.
 name: demo-video
