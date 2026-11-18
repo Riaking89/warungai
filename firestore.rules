@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// WarungAI demo shop — demo-only rules for the hackathon.
+// Anyone can read/write the demo shop so judges can try the app
+// without an account. Tighten before any production use.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /shops/demo/{document=**} {
+      allow read, write: if true;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

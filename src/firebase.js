@@ -1,0 +1,106 @@
+// WarungAI — Firebase setup.
+// Project: buildhybridai-ria (Spark free). Client config is public
+// (shipped in the web app by design); it is NOT a secret.
+import { initializeApp } from 'firebase/app';
+import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { initializeAppCheck, CustomProvider } from 'firebase/app-check';
+import {
+  getAI,
+  getGenerativeModel,
+  GoogleAIBackend,
+  InferenceMode,
+} from 'firebase/ai';
+
+export const firebaseConfig = {
+  apiKey: 'AIzaSyAsamvZp3kTl2CnI89-mT0elgpeuUxX2PE',
+  authDomain: 'buildhybridai-ria.firebaseapp.com',
+  projectId: 'buildhybridai-ria',
+  storageBucket: 'buildhybridai-ria.firebasestorage.app',
+  messagingSenderId: '368065882947',
+  appId: '1:368065882947:web:c175982e949c8825371df6',
+};
+
+export const app = initializeApp(firebaseConfig);
+
+// ---- App Check (debug provider) -------------------------------------------
+// Firebase AI Logic enforces App Check. For this hackathon demo we use the
+// debug provider (accepted in hackathon submissions): the SDK prints a
+// debug token in the console; register it in the Firebase console under
+// Security > App Check > Apps > Manage debug tokens.
+// In debug mode the provider below is never called for attestation — the
+// debug token exchange is used instead.
+self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+try {
+  initializeAppCheck(app, {
+    provider: new CustomProvider({
+      getToken: async () => {
+        throw new Error('App Check debug mode only — provider never called');
+      },
+    }),
+    isTokenAutoRefreshEnabled: true,
+  });
+} catch (e) {
+  console.warn('[WarungAI] App Check init failed (non-fatal):', e);
+}
+
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// Anonymous sign-in is best-effort: if the Anonymous provider is not
+// enabled in the console yet, the app keeps working without a uid.
+export async function ensureAnonAuth() {
+  try {
+    const cred = await signInAnonymously(auth);
+    return { uid: cred.user.uid, error: null };
+  } catch (e) {
+    console.warn('[WarungAI] anonymous auth failed:', e.code || e.message);
+    return { uid: null, error: e.code || String(e) };
+  }
+}
+
+// ---- Firebase AI Logic — hybrid inference ---------------------------------
+// Backend: Gemini Developer API (free). Routing goes through the SDK —
+// the app never picks a backend itself.
+const ai = getAI(app, { backend: new GoogleAIBackend() });
+
+// Short replies / short descriptions: on-device first (Gemini Nano),
+// cloud fallback is the SDK default (gemini-2.5-flash-lite).
+export const hybridModel = getGenerativeModel(ai, {
+  mode: InferenceMode.PREFER_ON_DEVICE,
+});
+
+// Long marketing copy: cloud first, on-device fallback if offline.
+export const cloudModel = getGenerativeModel(ai, {
+  mode: InferenceMode.PREFER_IN_CLOUD,
+});
+
+let deviceModelInitStarted = false;
+
+/**
+ * Must be called after/on a user interaction and before the first
+ * generateContent() call. Starts the Gemini Nano download if needed and
+ * reports progress (0..1). Safe to call repeatedly; errors are swallowed
+ * because PREFER_ON_DEVICE still falls back to cloud.
+ */
+export async function initDeviceModel(onProgress) {
+  if (deviceModelInitStarted) return;
+  deviceModelInitStarted = true;
+  try {
+    await hybridModel.initializeDeviceModel((p) => onProgress && onProgress(p));
+  } catch (e) {
+    console.warn('[WarungAI] initializeDeviceModel:', e.message || e);
+  }
+}
+
+/** Raw Prompt API availability, for the honest status pill. */
+export async function nanoAvailability() {
+  try {
+    if (!('LanguageModel' in window) || !window.LanguageModel?.availability) {
+      return 'unsupported';
+    }
+    return await window.LanguageModel.availability();
+  } catch {
+    return 'unknown';
+  }
+}
