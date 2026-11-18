@@ -65,13 +65,16 @@ export async function ensureAnonAuth() {
 const ai = getAI(app, { backend: new GoogleAIBackend() });
 
 // Short replies / short descriptions: on-device first (Gemini Nano),
-// cloud fallback is the SDK default (gemini-2.5-flash-lite).
+// cloud fallback is gemini-3.5-flash-lite (explicit — the SDK default
+// gemini-2.5-flash-lite was retired for new users, 404 in CI 19 Nov).
 export const hybridModel = getGenerativeModel(ai, {
+  model: 'gemini-3.5-flash-lite',
   mode: InferenceMode.PREFER_ON_DEVICE,
 });
 
 // Long marketing copy: cloud first, on-device fallback if offline.
 export const cloudModel = getGenerativeModel(ai, {
+  model: 'gemini-3.5-flash-lite',
   mode: InferenceMode.PREFER_IN_CLOUD,
 });
 
